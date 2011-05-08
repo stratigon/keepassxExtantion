@@ -15,6 +15,11 @@
 
 #include "PluginCore.h"
 
+// TEST
+#include <QtCore>
+#include "keepassx.h"
+
+
 
 FB_FORWARD_PTR(keepassxExtantion)
 class keepassxExtantion : public FB::PluginCore
@@ -35,6 +40,8 @@ public:
     // value of the "windowless" param tag, remove this method or return
     // FB::PluginCore::isWindowless()
     virtual bool isWindowless() { return false; }
+	
+	//FB:variant getParam(const std::string& name) {return m_params[name];}
 
     BEGIN_PLUGIN_EVENT_MAP()
         EVENTTYPE_CASE(FB::MouseDownEvent, onMouseDown, FB::PluginWindow)

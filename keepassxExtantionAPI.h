@@ -34,6 +34,11 @@ public:
     
     // Method test-event
     void testEvent(const FB::variant& s);
+	
+	// Method add
+	long add(long a, long b, long c);
+	
+	//FB::variant get_param();
 
 private:
     keepassxExtantionWeakPtr m_plugin;

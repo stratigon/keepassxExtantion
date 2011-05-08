@@ -1,0 +1,1 @@
+ADD_LIBRARY(KPXLIB AutoType AutoTypeGlobalX11 AutoTypeTreeWidget AutoTypeX11 bookmarks EntryView FileDialogs GroupView HelperX11 random SecString ShortcutWidget tools UrlLabel WaitAnimationWidget)

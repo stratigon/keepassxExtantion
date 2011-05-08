@@ -10,11 +10,24 @@ set (CMAKE_BACKWARDS_COMPATIBILITY 2.6)
 
 Project(${PLUGIN_NAME})
 
-file (GLOB GENERAL RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+#file (GLOB GENERAL RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+#    [^.]*.cpp
+#    [^.]*.h
+#    [^.]*.cmake
+#    )
+
+
+file (GLOB_RECURSE GENERAL RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
     [^.]*.cpp
+    [^.]*.c
     [^.]*.h
     [^.]*.cmake
+#    crypto *.cpp
+#    crypto *.h
+#    lib *.cpp
+#    lib *.h
     )
+
 
 include_directories(${PLUGIN_INCLUDE_DIRS})
 

@@ -24,7 +24,9 @@ keepassxExtantionAPI::keepassxExtantionAPI(const keepassxExtantionPtr& plugin, c
 {
     registerMethod("echo",      make_method(this, &keepassxExtantionAPI::echo));
     registerMethod("testEvent", make_method(this, &keepassxExtantionAPI::testEvent));
+    registerMethod("add",		make_method(this, &keepassxExtantionAPI::add));
 
+	
     // Read-write property
     registerProperty("testString",
                      make_property(this,
@@ -32,9 +34,12 @@ keepassxExtantionAPI::keepassxExtantionAPI(const keepassxExtantionPtr& plugin, c
                         &keepassxExtantionAPI::set_testString));
 
     // Read-only property
-    registerProperty("version",
+//    registerProperty("param",
+//                     make_property(this,
+//								   &keepassxExtantionAPI::get_param));
+	registerProperty("version",
                      make_property(this,
-                        &keepassxExtantionAPI::get_version));
+								   &keepassxExtantionAPI::get_version));
     
     
     registerEvent("onfired");    
@@ -92,8 +97,19 @@ FB::variant keepassxExtantionAPI::echo(const FB::variant& msg)
     return msg;
 }
 
+
 void keepassxExtantionAPI::testEvent(const FB::variant& var)
 {
     FireEvent("onfired", FB::variant_list_of(var)(true)(1));
 }
 
+long keepassxExtantionAPI::add(long a, long b, long c)
+{
+	return a + b + c;
+}
+
+//FB:variant keepassxExtantionAPI::get_param(int dd)
+//{
+//	return getPlugin()->m_params["data"];
+//	//return getPlugin()->getParam("data");
+//}
