@@ -21,7 +21,12 @@
 #define _STD_DATABASE_H_
 
 #include <QThread>
+#include <QTextCodec>
+#include <QMap>
+
 #include "Database.h"
+#include "crypto/aescpp.h"
+#include "lib/tools.h"
 
 
 #define DB_HEADER_SIZE	124
@@ -33,6 +38,8 @@
 #define PWM_FLAG_ARCFOUR		4
 #define PWM_FLAG_TWOFISH		8
 #define PWM_STD_KEYENCROUNDS 	6000
+
+#define BUILTIN_ICONS 69
 
 void memcpyFromLEnd32(quint32* dst,const char* src);
 void memcpyFromLEnd16(quint16* dst,const char* src);

@@ -19,6 +19,9 @@
 #ifndef TOOLS_H
 #define TOOLS_H
 
+
+#include <QIcon>
+
 class IEntryHandle;
 
 enum tKeyType {PASSWORD=0,KEYFILE=1,BOTH=2};

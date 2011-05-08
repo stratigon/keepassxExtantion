@@ -21,22 +21,7 @@
 #define _SECSTRING_H_
 
 #include "../crypto/arcfour.h"
-#include "../keepassx.h"
-
-
-
-
-
-class CArcFour{
-public:
-	void encrypt(const quint8* src, quint8* dst, uint length);
-	inline void decrypt(const quint8* src, quint8* dst, uint length){encrypt(src,dst,length);} //just for readability
-	void setKey(quint8* key, uint length);
-	
-private:
-	quint8* RawKey;
-	uint RawKeyLength;
-};
+//#include "../keepassx.h"
 
 
 

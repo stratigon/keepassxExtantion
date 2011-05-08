@@ -13,9 +13,17 @@
 
 
 
-#include "Kdb3Database.h"
+//#include "Kdb3Database.h"
 
 //db = new Kdb3Database();
+
+#include "lib/SecString.h"
+
+SecString Passwd;
+
+
+//IDatabase* db_new=dynamic_cast<IDatabase*>(new Kdb3Database());
+//db_new
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @fn keepassxExtantion::StaticInitialize()

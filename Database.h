@@ -21,10 +21,15 @@
 #ifndef _DATABASE_H_
 #define _DATABASE_H_
 
-#include "keepassx.h"
+//#include "keepassx.h"
+#include <QDateTime>
+#include <QCoreApplication>
+#include <QLocale>
+#include <QPixmap>
+#include <QFile>
 
-
-
+#include "lib/SecString.h"
+#include "crypto/yarrow.h"
 
 
 
@@ -33,6 +38,8 @@
 
 
 extern const QDateTime Date_Never;
+//const QDateTime Date_Never(QDate(2999,12,28),QTime(23,59,59));
+
 
 enum CryptAlgorithm{
 	Rijndael_Cipher=0,

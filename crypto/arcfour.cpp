@@ -17,7 +17,7 @@
 */
 
 #include "arcfour.h"
-#include "../keepassx.h"
+//#include "../keepassx.h"
 
 void CArcFour::setKey(quint8* key, uint length){
 	RawKey = key;
