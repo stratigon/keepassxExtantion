@@ -21,7 +21,16 @@
 #include <QLibraryInfo>
 #include <QProcess>
 #include <QTranslator>
-#include "../keepassx.h"
+#include <QColor>
+#include <QPixmap>
+#include <QPainter>
+#include <QFile>
+#include <QApplication>
+#include <QDir>
+
+#include "tools.h"
+#include "../crypto/yarrow.h"
+//#include "../keepassx.h"
 
 #if defined(Q_WS_X11) || defined(Q_WS_MAC)
 	#include <sys/mman.h>
@@ -79,48 +88,48 @@ QString decodeFileError(QFile::FileError Code){
 	return QString();
 }
 
-void openBrowser(IEntryHandle* entry){
-	QString url = entry->url();
-	url.replace("{TITLE}", entry->title(), Qt::CaseInsensitive);
-	url.replace("{USERNAME}", entry->username(), Qt::CaseInsensitive);
-	
-	if (url.contains("{PASSWORD}",Qt::CaseInsensitive)){
-		SecString password=entry->password();
-		password.unlock();
-		url.replace("{PASSWORD}", password, Qt::CaseInsensitive);
-	}
-	
-	openBrowser(url);
-}
-
-void openBrowser(const QString& UrlString){
-	if (UrlString.trimmed().isEmpty())
-		return;
-	
-	if (UrlString.startsWith("cmd://") && UrlString.length()>6){
-		QProcess::startDetached(UrlString.right(UrlString.length()-6));
-		return;
-	}
-	
-	QUrl url(UrlString);
-	if(url.scheme().isEmpty())
-		url=QUrl("http://"+UrlString);
-//	if(config->urlCmdDef() || url.scheme()=="mailto"){
-	if(url.scheme()=="mailto"){
-		QDesktopServices::openUrl(url);
-	}
-//	else{
-//		QByteArray UrlEncoded = url.toEncoded();
-//		QString browser = config->urlCmd();
-//		if (browser.contains("%u", Qt::CaseInsensitive))
-//			browser.replace("%u", UrlEncoded, Qt::CaseInsensitive);
-//		else if (browser.contains("%1"))
-//			browser.replace("%1", UrlEncoded);
-//		else
-//			browser.append(" ").append(UrlEncoded);
-//		QProcess::startDetached(browser);
+//void openBrowser(IEntryHandle* entry){
+//	QString url = entry->url();
+//	url.replace("{TITLE}", entry->title(), Qt::CaseInsensitive);
+//	url.replace("{USERNAME}", entry->username(), Qt::CaseInsensitive);
+//	
+//	if (url.contains("{PASSWORD}",Qt::CaseInsensitive)){
+//		SecString password=entry->password();
+//		password.unlock();
+//		url.replace("{PASSWORD}", password, Qt::CaseInsensitive);
 //	}
-}
+//	
+//	openBrowser(url);
+//}
+
+//void openBrowser(const QString& UrlString){
+//	if (UrlString.trimmed().isEmpty())
+//		return;
+//	
+//	if (UrlString.startsWith("cmd://") && UrlString.length()>6){
+//		QProcess::startDetached(UrlString.right(UrlString.length()-6));
+//		return;
+//	}
+//	
+//	QUrl url(UrlString);
+//	if(url.scheme().isEmpty())
+//		url=QUrl("http://"+UrlString);
+////	if(config->urlCmdDef() || url.scheme()=="mailto"){
+//	if(url.scheme()=="mailto"){
+//		QDesktopServices::openUrl(url);
+//	}
+////	else{
+////		QByteArray UrlEncoded = url.toEncoded();
+////		QString browser = config->urlCmd();
+////		if (browser.contains("%u", Qt::CaseInsensitive))
+////			browser.replace("%u", UrlEncoded, Qt::CaseInsensitive);
+////		else if (browser.contains("%1"))
+////			browser.replace("%1", UrlEncoded);
+////		else
+////			browser.append(" ").append(UrlEncoded);
+////		QProcess::startDetached(browser);
+////	}
+//}
 
 
 QString makePathRelative(const QString& AbsDir,const QString& CurDir){
@@ -138,9 +147,9 @@ QString makePathRelative(const QString& AbsDir,const QString& CurDir){
 	return rel;
 }
 
-void showErrMsg(const QString& msg,QWidget* parent){
-	QMessageBox::critical(parent, QApplication::translate("Main","Error"), msg);
-}
+//void showErrMsg(const QString& msg,QWidget* parent){
+//	QMessageBox::critical(parent, QApplication::translate("Main","Error"), msg);
+//}
 
 //QString getImageFile(const QString& name){
 //	if (QFile::exists(DataDir+"/icons/"+name))

@@ -21,6 +21,8 @@
 
 
 #include <QIcon>
+#include <QFile>
+#include "../Database.h"
 
 class IEntryHandle;
 

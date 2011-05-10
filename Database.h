@@ -178,36 +178,6 @@ public:
 	virtual CEntry data()const=0;
 };
 
-//! Custom Icon Interface
-/*!
-This class provides an interface for the management of custom icons. The implementation is optional and not necessarily needed.
- */
-class ICustomIcons:public QObject{
-	Q_OBJECT
-	public:
-		/*! Adds a new custom icon to the database.
-		\param icon The pixmap which contains the new icon. This function makes a copy of the given pixmap.
-		 */
-		virtual void addIcon(const QPixmap& icon)=0;
-
-		/*! Removes an icon.
-		\param index The index of the icon which should be removed. Built-in icons cannot be removed so make sure that index is not the index of an Built-in icon before calling this function.
-		 */
-		virtual void removeIcon(int index)=0;
-
-		/*! Replaces one icon with another one.
-		\param index The index of the icon which should be replaced. Built-in icons cannot be replaced so make sure that index is not the index of an Built-in icon before calling this function.
-		\param icon The pixmap which contains the new icon.
-		 */
-		virtual void replaceIcon(int index,const QPixmap& icon)=0;
-	signals:
-		/*! This signal is emitted when an icon was modified.
-		That means it is emitted after every call off addIcon(), removeIcon() and replaceIcon().
-		 */
-		//void iconsModified();
-
-};
-
 
 //! Handle class interface for accessing groups
 /*!
@@ -427,6 +397,12 @@ class IKdbSettings{
 		virtual CryptAlgorithm cryptAlgorithm()=0;
 		virtual unsigned int keyTransfRounds()=0;
 		virtual void setKeyTransfRounds(unsigned int rounds)=0;
+};
+
+class GroupViewItem{
+public:
+	GroupViewItem();
+	IGroupHandle* GroupHandle;
 };
 
 #endif

@@ -22,8 +22,14 @@
 #include "crypto/twoclass.h"
 #include <QBuffer>
 #include <algorithm>
+#include <QIODevice>
+
+#include "KeyTransform.h"
+
 
 #define UNEXP_ERROR error=QString("Unexpected error in: %1, Line:%2").arg(__FILE__).arg(__LINE__);
+
+QPixmap* EntryIcons;
 
 const QDateTime Date_Never(QDate(2999,12,28),QTime(23,59,59));
 
@@ -52,9 +58,15 @@ bool Kdb3Database::StdEntryLessThan(const Kdb3Database::StdEntry& This,const Kdb
 }
 
 
+
+
 Kdb3Database::Kdb3Database() : File(NULL), RawMasterKey(32), RawMasterKey_CP1252(32),
 	RawMasterKey_Latin1(32), RawMasterKey_UTF8(32), MasterKey(32){
 }
+
+
+
+
 
 QString Kdb3Database::getError(){
 	return error;
@@ -66,10 +78,10 @@ void Kdb3Database::addIcon(const QPixmap& icon){
 }
 
 QPixmap& Kdb3Database::icon(int i){
-//	if(i>=builtinIcons()+CustomIcons.size())
-//		return EntryIcons[0];
-//	if(i<builtinIcons())
-//		return EntryIcons[i];
+	if(i>=builtinIcons()+CustomIcons.size())
+		return EntryIcons[0];
+	if(i<builtinIcons())
+		return EntryIcons[i];
 	return CustomIcons[i-builtinIcons()];
 }
 
@@ -105,7 +117,7 @@ int Kdb3Database::numIcons(){
 
 bool Kdb3Database::parseMetaStream(const StdEntry& entry){
 
-	qDebug("Found Metastream: %s", CSTR(entry.Comment));
+//	qDebug("Found Metastream: %s", CSTR(entry.Comment));
 
 	if(entry.Comment=="KPX_GROUP_TREE_STATE"){
 		parseGroupTreeStateMetaStream(entry.Binary);
@@ -521,7 +533,7 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 	File = new QFile(filename);
 	if (readOnly) {
 		if(!File->open(QIODevice::ReadOnly)){
-			error=tr("Could not open file.");
+//			error=tr("Could not open file.");
 			delete File;
 			File = NULL;
 			return false;
@@ -530,7 +542,7 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 	else {
 		if(!File->open(QIODevice::ReadWrite)){
 			if(!File->open(QIODevice::ReadOnly)){
-				error=tr("Could not open file.");
+//				error=tr("Could not open file.");
 				delete File;
 				File = NULL;
 				return false;
@@ -554,7 +566,7 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 	File->read(buffer,total_size);
 	
 	if(total_size < DB_HEADER_SIZE){
-		error=tr("Unexpected file size (DB_TOTAL_SIZE < DB_HEADER_SIZE)");
+//		error=tr("Unexpected file size (DB_TOTAL_SIZE < DB_HEADER_SIZE)");
 		LOAD_RETURN_CLEANUP
 	}
 	
@@ -571,12 +583,12 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 	memcpyFromLEnd32(&KeyTransfRounds,buffer+120);
 	
 	if((Signature1!=PWM_DBSIG_1) || (Signature2!=PWM_DBSIG_2)){
-		error=tr("Wrong Signature");
+//		error=tr("Wrong Signature");
 		LOAD_RETURN_CLEANUP
 	}
 	
 	if((Version & 0xFFFFFF00) != (PWM_DBVER_DW & 0xFFFFFF00)){
-		error=tr("Unsupported File Version.");
+//		error=tr("Unsupported File Version.");
 		LOAD_RETURN_CLEANUP
 	}
 	
@@ -585,7 +597,7 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 	else if (Flags & PWM_FLAG_TWOFISH)
 		Algorithm = Twofish_Cipher;
 	else{
-		error=tr("Unknown Encryption Algorithm.");
+//		error=tr("Unknown Encryption Algorithm.");
 		LOAD_RETURN_CLEANUP
 	}
 	
@@ -612,19 +624,19 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 	else if(Algorithm == Twofish_Cipher){
 		CTwofish twofish;
 		if (twofish.init(FinalKey, 32, EncryptionIV) != true){
-			error=tr("Unable to initialize the twofish algorithm.");
+//			error=tr("Unable to initialize the twofish algorithm.");
 			LOAD_RETURN_CLEANUP
 		}
 		crypto_size = (unsigned long)twofish.padDecrypt((quint8 *)buffer + DB_HEADER_SIZE,
 		total_size - DB_HEADER_SIZE, (quint8 *)buffer + DB_HEADER_SIZE);
 	}
 	else{
-		error=tr("Unknown encryption algorithm.");
+//		error=tr("Unknown encryption algorithm.");
 		LOAD_RETURN_CLEANUP
 	}
 	
 	if ((crypto_size > 2147483446) || (!crypto_size && NumGroups)){
-		error=tr("Decryption failed.\nThe key is wrong or the file is damaged.");
+//		error=tr("Decryption failed.\nThe key is wrong or the file is damaged.");
 		KeyError=true;
 		LOAD_RETURN_CLEANUP
 	}
@@ -651,7 +663,7 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 			qDebug("Decryption failed. Retrying with UTF-8.");
 			return loadReal(filename, readOnly, true); // second/third try
 		}
-		error=tr("Hash test failed.\nThe key is wrong or the file is damaged.");
+//		error=tr("Hash test failed.\nThe key is wrong or the file is damaged.");
 		KeyError=true;
 		LOAD_RETURN_CLEANUP
 	}
@@ -674,14 +686,14 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 		memcpyFromLEnd16(&FieldType, pField);
 		pField += 2; pos += 2;
 		if (pos >= total_size){
-			error=tr("Unexpected error: Offset is out of range.").append(" [G1]");
+//			error=tr("Unexpected error: Offset is out of range.").append(" [G1]");
 			LOAD_RETURN_CLEANUP
 		}
 	
 		memcpyFromLEnd32(&FieldSize, pField);
 		pField += 4; pos += 4;
 		if (pos >= (total_size + FieldSize)){
-			error=tr("Unexpected error: Offset is out of range.").append(" [G2]");
+//			error=tr("Unexpected error: Offset is out of range.").append(" [G2]");
 			LOAD_RETURN_CLEANUP
 		}
 	
@@ -693,7 +705,7 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 		pField += FieldSize;
 		pos += FieldSize;
 		if (pos >= total_size){
-			error=tr("Unexpected error: Offset is out of range.").append(" [G1]");
+//			error=tr("Unexpected error: Offset is out of range.").append(" [G1]");
 			LOAD_RETURN_CLEANUP
 		}
 	}
@@ -707,14 +719,14 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 		memcpyFromLEnd16(&FieldType, pField);
 		pField += 2; pos += 2;
 		if(pos >= total_size){
-			error=tr("Unexpected error: Offset is out of range.").append(" [E1]");
+//			error=tr("Unexpected error: Offset is out of range.").append(" [E1]");
 			LOAD_RETURN_CLEANUP
 		}
 	
 		memcpyFromLEnd32(&FieldSize, pField);
 		pField += 4; pos += 4;
 		if (pos >= (total_size + FieldSize)){
-			error=tr("Unexpected error: Offset is out of range.").append(" [E2]");
+//			error=tr("Unexpected error: Offset is out of range.").append(" [E2]");
 			LOAD_RETURN_CLEANUP
 		}
 	
@@ -730,13 +742,13 @@ bool Kdb3Database::loadReal(QString filename, bool readOnly, bool differentEncod
 		pField += FieldSize;
 		pos += FieldSize;
 		if (pos >= total_size){
-			error=tr("Unexpected error: Offset is out of range.").append(" [E3]");
+//			error=tr("Unexpected error: Offset is out of range.").append(" [E3]");
 			LOAD_RETURN_CLEANUP
 		}
 	}
 	
 	if(!createGroupTree(Levels)){
-		error=tr("Invalid group tree.");
+//		error=tr("Invalid group tree.");
 		LOAD_RETURN_CLEANUP
 	}
 	
@@ -952,7 +964,7 @@ bool Kdb3Database::setFileKey(const QString& filename){
 	}
 	qint64 FileSize=file.size();
 	if(FileSize == 0){
-		error=tr("Key file is empty.");
+//		error=tr("Key file is empty.");
 		return false;
 	}
 	RawMasterKey.unlock();
@@ -1020,8 +1032,9 @@ QList<IEntryHandle*> Kdb3Database::expiredEntries(){
 	for(int i=0; i<EntryHandles.size(); i++){
 		if(EntryHandles[i].isValid() &&
 		  (EntryHandles[i].expire()<=QDateTime::currentDateTime()) &&
-		  (EntryHandles[i].expire()!=Date_Never))
+		   (EntryHandles[i].expire()!=Date_Never)){
 			handles.append(&EntryHandles[i]);
+		}
 	}
 	return handles;
 }
@@ -1086,8 +1099,11 @@ void Kdb3Database::deleteEntries(QList<IEntryHandle*> entries){
 
 QList<IGroupHandle*> Kdb3Database::groups(){
 	QList<IGroupHandle*> handles;
+	
 	for(int i=0; i<GroupHandles.size(); i++){
-		if(GroupHandles[i].isValid())handles.append(&GroupHandles[i]);
+		if(GroupHandles[i].isValid()){ 
+			handles.append(&GroupHandles[i]);
+		}
 	}
 	return handles;
 }
@@ -1213,7 +1229,8 @@ QString Kdb3Database::EntryHandle::friendlySize()const
 
     if (binsize < 1024)
     {
-        unit = tr("Bytes");
+//      unit = tr("Bytes");
+        unit = "Bytes";
         faktor = 1;
         prec = 0;
     }
@@ -1221,18 +1238,21 @@ QString Kdb3Database::EntryHandle::friendlySize()const
     {
         if (binsize < 1048576)
         {
-            unit = tr("KiB");
+//          unit = tr("KiB");
+            unit = "KiB";
             faktor = 1024;
         }
         else
             if (binsize < 1073741824)
             {
-                unit = tr("MiB");
+//              unit = tr("MiB");
+                unit = "MiB";
                 faktor = 1048576;
             }
             else
             {
-                unit = tr("GiB");
+//                unit = tr("GiB");
+                unit = "GiB";
                 faktor = 1073741824;
             }
         prec = 1;
@@ -1350,19 +1370,19 @@ void memcpyToLEnd16(char* dst,const quint16* src){
 
 bool Kdb3Database::save(){
 	if(!Groups.size()){
-		error=tr("The database must contain at least one group.");
+//		error=tr("The database must contain at least one group.");
 		return false;
 	}
 	
 	if (!File->isOpen()) {
 		if(!File->open(QIODevice::ReadWrite)){
-			error=tr("Could not open file.");
+//			error=tr("Could not open file.");
 			return false;
 		}
 	}
 	
 	if(!(File->openMode() & QIODevice::WriteOnly)){
-		error = tr("The database has been opened read-only.");
+//		error = tr("The database has been opened read-only.");
 		return false;
 	}
 	
@@ -1976,7 +1996,7 @@ void Kdb3Database::generateMasterKey(){
 	randomize(TransfRandomSeed,32);
 	RawMasterKey.unlock();
 	MasterKey.unlock();
-	KeyTransform::transform(*RawMasterKey,*MasterKey,TransfRandomSeed,KeyTransfRounds);
+//	KeyTransform::transform(*RawMasterKey,*MasterKey,TransfRandomSeed,KeyTransfRounds);
 	RawMasterKey.lock();
 	MasterKey.lock();
 }
@@ -2003,26 +2023,28 @@ IDatabase* Kdb3Database::groupToNewDb(IGroupHandle* group){
 	copyTree(db, static_cast<GroupHandle*>(group), NULL);
 	
 	db->changeFile("/ramtmp/test.kdb");
-	if (!db->save())
-		qWarning("%s", CSTR(db->error));
+	if (!db->save()){
+//		qWarning("%s", CSTR(db->error));
+	}
 	
 	return db;
 }
 
 
 void KeyTransform::transform(quint8* src, quint8* dst, quint8* KeySeed, int rounds){
-	KeyTransform* ktLeft = new KeyTransform(&src[0], &dst[0], KeySeed, rounds);
-	KeyTransform* ktRight = new KeyTransform(&src[16], &dst[16], KeySeed, rounds);
-	ktLeft->start();
-	ktRight->start();
-	ktLeft->wait();
-	ktRight->wait();
-	SHA256::hashBuffer(dst,dst,32);
-	delete ktLeft;
-	delete ktRight;
+//	KeyTransform* ktLeft = new KeyTransform(&src[0], &dst[0], KeySeed, rounds);
+//	KeyTransform* ktRight = new KeyTransform(&src[16], &dst[16], KeySeed, rounds);
+//	ktLeft->start();
+//	ktRight->start();
+//	ktLeft->wait();
+//	ktRight->wait();
+//	SHA256::hashBuffer(dst,dst,32);
+//	delete ktLeft;
+//	delete ktRight;
 }
 
 KeyTransform::KeyTransform(quint8* pSrc, quint8* pDst, quint8* pKeySeed, int pRounds){
+//KeyTransform::KeyTransform(){
 	src = pSrc;
 	dst = pDst;
 	KeySeed = pKeySeed;
@@ -2038,7 +2060,7 @@ void KeyTransform::run(){
 	}
 }
 
-//
+
 //int KeyTransformBenchmark::benchmark(int pMSecs){
 //	KeyTransformBenchmark* ktbLeft = new KeyTransformBenchmark(pMSecs);
 //	KeyTransformBenchmark* ktbRight = new KeyTransformBenchmark(pMSecs);
@@ -2052,31 +2074,32 @@ void KeyTransform::run(){
 //	
 //	return num;
 //}
-//
+
 //KeyTransformBenchmark::KeyTransformBenchmark(int pMSecs){
 //	msecs = pMSecs;
 //	rounds = 0;
 //}
 
-void KeyTransformBenchmark::run(){
-	quint8 KeySeed[32];
-	memset(KeySeed, 0x4B, 32);
-	quint8 dst[16];
-	memset(dst, 0x7E, 16);
-	
-	QTime t;
-	t.start();
-	
-	AESencrypt aes;
-	aes.key256(KeySeed);
-	
-	do {
-		for (int i=0; i<64; i++){
-			aes.ecb_encrypt(dst,dst,16);
-		}
-		rounds += 64;
-	} while (t.elapsed() < msecs);
-}
+//void KeyTransformBenchmark::run(){
+//	quint8 KeySeed[32];
+//	memset(KeySeed, 0x4B, 32);
+//	quint8 dst[16];
+//	memset(dst, 0x7E, 16);
+//	
+//	QTime t;
+//	t.start();
+//	
+//	AESencrypt aes;
+//	aes.key256(KeySeed);
+//	
+//	do {
+//		for (int i=0; i<64; i++){
+//			aes.ecb_encrypt(dst,dst,16);
+//		}
+//		rounds += 64;
+//	} while (t.elapsed() < msecs);
+//}
+
 
 
 

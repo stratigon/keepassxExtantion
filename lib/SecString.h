@@ -21,6 +21,7 @@
 #define _SECSTRING_H_
 
 #include "../crypto/arcfour.h"
+#include "../crypto/yarrow.h"
 //#include "../keepassx.h"
 
 

@@ -171,10 +171,10 @@
  * Standard include files will probably be ok.
  */
 
-//#include <QString>     /* for memset(), memcpy(), and memcmp() */
+#include <QString>     /* for memset(), memcpy(), and memcmp() */
 #include <cstdlib>
 #include "twofish.h"
-#include "../keepassx.h"
+//#include "../keepassx.h"
 
 
 /*

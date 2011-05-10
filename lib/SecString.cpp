@@ -18,7 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "../keepassx.h"
+//#include "../keepassx.h"
+#include "SecString.h"
+#include "tools.h"
 
 CArcFour SecString::RC4;
 quint8* SecString::sessionkey;

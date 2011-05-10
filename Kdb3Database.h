@@ -23,6 +23,9 @@
 #include <QThread>
 #include <QTextCodec>
 #include <QMap>
+#include <QFile>
+
+
 
 #include "Database.h"
 #include "crypto/aescpp.h"
@@ -46,10 +49,44 @@ void memcpyFromLEnd16(quint16* dst,const char* src);
 void memcpyToLEnd32(char* src,const quint32* dst);
 void memcpyToLEnd16(char* src,const quint16* dst);
 
+
+//! Custom Icon Interface
+/*!
+ This class provides an interface for the management of custom icons. The implementation is optional and not necessarily needed.
+ */
+class ICustomIcons:public QObject{
+//	Q_OBJECT
+public:
+	/*! Adds a new custom icon to the database.
+	 \param icon The pixmap which contains the new icon. This function makes a copy of the given pixmap.
+	 */
+	virtual void addIcon(const QPixmap& icon)=0;
+	
+	/*! Removes an icon.
+	 \param index The index of the icon which should be removed. Built-in icons cannot be removed so make sure that index is not the index of an Built-in icon before calling this function.
+	 */
+	virtual void removeIcon(int index)=0;
+	
+	/*! Replaces one icon with another one.
+	 \param index The index of the icon which should be replaced. Built-in icons cannot be replaced so make sure that index is not the index of an Built-in icon before calling this function.
+	 \param icon The pixmap which contains the new icon.
+	 */
+	virtual void replaceIcon(int index,const QPixmap& icon)=0;
+//signals:
+//	/*! This signal is emitted when an icon was modified.
+//	 That means it is emitted after every call off addIcon(), removeIcon() and replaceIcon().
+//	 */
+//	void iconsModified();
+	
+};
+
+
+
+
 //! Implementation of the standard KeePassX database.
 //class Kdb3Database:public ICustomIcons,public IDatabase, public IKdbSettings{
 class Kdb3Database:public IDatabase, public IKdbSettings{
-	Q_OBJECT
+//	Q_OBJECT
 public:
 	class StdGroup;
 	class StdEntry;
@@ -267,6 +304,7 @@ private:
 };
 
 class KeyTransform : public QThread{
+//class KeyTransform {
 	Q_OBJECT
 	
 	public:
@@ -284,6 +322,7 @@ class KeyTransform : public QThread{
 };
 
 class KeyTransformBenchmark : public QThread{
+//class KeyTransformBenchmark {
 	Q_OBJECT
 	
 	public:

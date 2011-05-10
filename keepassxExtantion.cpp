@@ -12,13 +12,14 @@
 #include "keepassxExtantion.h"
 
 
-
 //#include "Kdb3Database.h"
-
+//#include "Database.h"
 //db = new Kdb3Database();
+//Kdb3Database db;
+//Kdb3Database* db = new Kdb3Database();
+//ICustomIcons* CustomIconsDb=dynamic_cast<ICustomIcons*>(db);
 
 #include "lib/SecString.h"
-
 SecString Passwd;
 
 
