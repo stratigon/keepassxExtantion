@@ -11,6 +11,13 @@
 #include "BrowserHost.h"
 #include "keepassxExtantion.h"
 
+// TEST
+#include <QtCore>
+
+//#include "Database.h"
+#include "Kdb3Database.h"
+
+
 #ifndef H_keepassxExtantionAPI
 #define H_keepassxExtantionAPI
 
@@ -39,12 +46,21 @@ public:
 	long add(long a, long b, long c);
 	
 	//FB::variant get_param();
+	
+	// Method openDatabase
+//	bool openDatabase(IDatabase* db, QString filename);
+	int openDatabase();
+	
+public:
+	IDatabase* db;
 
 private:
     keepassxExtantionWeakPtr m_plugin;
     FB::BrowserHostPtr m_host;
 
     std::string m_testString;
+
+	bool dbReadOnly;
 };
 
 #endif // H_keepassxExtantionAPI

@@ -24,7 +24,6 @@
 #include <algorithm>
 #include <QIODevice>
 
-#include "KeyTransform.h"
 
 
 #define UNEXP_ERROR error=QString("Unexpected error in: %1, Line:%2").arg(__FILE__).arg(__LINE__);
@@ -1996,7 +1995,7 @@ void Kdb3Database::generateMasterKey(){
 	randomize(TransfRandomSeed,32);
 	RawMasterKey.unlock();
 	MasterKey.unlock();
-//	KeyTransform::transform(*RawMasterKey,*MasterKey,TransfRandomSeed,KeyTransfRounds);
+	KeyTransform::transform(*RawMasterKey,*MasterKey,TransfRandomSeed,KeyTransfRounds);
 	RawMasterKey.lock();
 	MasterKey.lock();
 }
@@ -2032,19 +2031,18 @@ IDatabase* Kdb3Database::groupToNewDb(IGroupHandle* group){
 
 
 void KeyTransform::transform(quint8* src, quint8* dst, quint8* KeySeed, int rounds){
-//	KeyTransform* ktLeft = new KeyTransform(&src[0], &dst[0], KeySeed, rounds);
-//	KeyTransform* ktRight = new KeyTransform(&src[16], &dst[16], KeySeed, rounds);
-//	ktLeft->start();
-//	ktRight->start();
-//	ktLeft->wait();
-//	ktRight->wait();
-//	SHA256::hashBuffer(dst,dst,32);
-//	delete ktLeft;
-//	delete ktRight;
+	KeyTransform* ktLeft = new KeyTransform(&src[0], &dst[0], KeySeed, rounds);
+	KeyTransform* ktRight = new KeyTransform(&src[16], &dst[16], KeySeed, rounds);
+	ktLeft->start();
+	ktRight->start();
+	ktLeft->wait();
+	ktRight->wait();
+	SHA256::hashBuffer(dst,dst,32);
+	delete ktLeft;
+	delete ktRight;
 }
 
 KeyTransform::KeyTransform(quint8* pSrc, quint8* pDst, quint8* pKeySeed, int pRounds){
-//KeyTransform::KeyTransform(){
 	src = pSrc;
 	dst = pDst;
 	KeySeed = pKeySeed;
@@ -2061,44 +2059,44 @@ void KeyTransform::run(){
 }
 
 
-//int KeyTransformBenchmark::benchmark(int pMSecs){
-//	KeyTransformBenchmark* ktbLeft = new KeyTransformBenchmark(pMSecs);
-//	KeyTransformBenchmark* ktbRight = new KeyTransformBenchmark(pMSecs);
-//	ktbLeft->start();
-//	ktbRight->start();
-//	ktbLeft->wait();
-//	ktbRight->wait();
-//	int num = std::min(ktbLeft->rounds, ktbRight->rounds);
-//	delete ktbLeft;
-//	delete ktbRight;
-//	
-//	return num;
-//}
+int KeyTransformBenchmark::benchmark(int pMSecs){
+	KeyTransformBenchmark* ktbLeft = new KeyTransformBenchmark(pMSecs);
+	KeyTransformBenchmark* ktbRight = new KeyTransformBenchmark(pMSecs);
+	ktbLeft->start();
+	ktbRight->start();
+	ktbLeft->wait();
+	ktbRight->wait();
+	int num = std::min(ktbLeft->rounds, ktbRight->rounds);
+	delete ktbLeft;
+	delete ktbRight;
+	
+	return num;
+}
 
-//KeyTransformBenchmark::KeyTransformBenchmark(int pMSecs){
-//	msecs = pMSecs;
-//	rounds = 0;
-//}
+KeyTransformBenchmark::KeyTransformBenchmark(int pMSecs){
+	msecs = pMSecs;
+	rounds = 0;
+}
 
-//void KeyTransformBenchmark::run(){
-//	quint8 KeySeed[32];
-//	memset(KeySeed, 0x4B, 32);
-//	quint8 dst[16];
-//	memset(dst, 0x7E, 16);
-//	
-//	QTime t;
-//	t.start();
-//	
-//	AESencrypt aes;
-//	aes.key256(KeySeed);
-//	
-//	do {
-//		for (int i=0; i<64; i++){
-//			aes.ecb_encrypt(dst,dst,16);
-//		}
-//		rounds += 64;
-//	} while (t.elapsed() < msecs);
-//}
+void KeyTransformBenchmark::run(){
+	quint8 KeySeed[32];
+	memset(KeySeed, 0x4B, 32);
+	quint8 dst[16];
+	memset(dst, 0x7E, 16);
+	
+	QTime t;
+	t.start();
+	
+	AESencrypt aes;
+	aes.key256(KeySeed);
+	
+	do {
+		for (int i=0; i<64; i++){
+			aes.ecb_encrypt(dst,dst,16);
+		}
+		rounds += 64;
+	} while (t.elapsed() < msecs);
+}
 
 
 

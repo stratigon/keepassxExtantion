@@ -8,23 +8,12 @@
 \**********************************************************/
 
 #include "keepassxExtantionAPI.h"
-
 #include "keepassxExtantion.h"
 
-
-//#include "Kdb3Database.h"
-//#include "Database.h"
-//db = new Kdb3Database();
-//Kdb3Database db;
-//Kdb3Database* db = new Kdb3Database();
-//ICustomIcons* CustomIconsDb=dynamic_cast<ICustomIcons*>(db);
-
-#include "lib/SecString.h"
-SecString Passwd;
+#include "Kdb3Database.h"
 
 
-//IDatabase* db_new=dynamic_cast<IDatabase*>(new Kdb3Database());
-//db_new
+
 
 ///////////////////////////////////////////////////////////////////////////////
 /// @fn keepassxExtantion::StaticInitialize()
@@ -52,6 +41,7 @@ void keepassxExtantion::StaticDeinitialize()
     // always be called just before the plugin library is unloaded
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief  keepassxExtantion constructor.  Note that your API is not available
 ///         at this point, nor the window.  For best results wait to use
@@ -61,6 +51,7 @@ keepassxExtantion::keepassxExtantion()
 {
 	//setParams("data");
 	//m_supportedParamSet.insert("data");
+	
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -129,4 +120,13 @@ bool keepassxExtantion::onWindowDetached(FB::DetachedEvent *evt, FB::PluginWindo
     // The window is about to be detached; act appropriately
     return false;
 }
+
+
+
+
+
+
+
+
+
 

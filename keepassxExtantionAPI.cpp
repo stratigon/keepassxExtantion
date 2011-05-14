@@ -25,6 +25,7 @@ keepassxExtantionAPI::keepassxExtantionAPI(const keepassxExtantionPtr& plugin, c
     registerMethod("echo",      make_method(this, &keepassxExtantionAPI::echo));
     registerMethod("testEvent", make_method(this, &keepassxExtantionAPI::testEvent));
     registerMethod("add",		make_method(this, &keepassxExtantionAPI::add));
+	registerMethod("openDatabase",		make_method(this, &keepassxExtantionAPI::openDatabase));
 
 	
     // Read-write property
@@ -54,6 +55,7 @@ keepassxExtantionAPI::keepassxExtantionAPI(const keepassxExtantionPtr& plugin, c
 ///////////////////////////////////////////////////////////////////////////////
 keepassxExtantionAPI::~keepassxExtantionAPI()
 {
+	SecString::deleteSessionKey();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,7 +107,8 @@ void keepassxExtantionAPI::testEvent(const FB::variant& var)
 
 long keepassxExtantionAPI::add(long a, long b, long c)
 {
-	return a + b + c;
+	long t = 2*(a+b+c);
+	return t;
 }
 
 //FB:variant keepassxExtantionAPI::get_param(int dd)
@@ -113,3 +116,74 @@ long keepassxExtantionAPI::add(long a, long b, long c)
 //	return getPlugin()->m_params["data"];
 //	//return getPlugin()->getParam("data");
 //}
+
+//! Connector to kdb database
+//bool keepassxExtantionAPI::openDatabase(IDatabase* db, QString filename)
+int keepassxExtantionAPI::openDatabase()
+{
+	//return 1;
+	
+	//db=NULL;
+	db = new Kdb3Database();
+	dbReadOnly = false;
+	const QString ArgFile="1.kdb";
+	
+	initYarrow(); //init random number generator
+	SecString::generateSessionKey();
+	
+	
+	
+	QString pass = "1";
+	QString keyfile = "";
+	db->setKey(pass, keyfile);
+
+	db->load("/tmp/1.kdb", dbReadOnly);
+	
+	int t = db->numEntries();
+	
+	
+	return t;
+	
+	
+//	if(!ArgFile.isEmpty()){
+//		//QString filename = QDir::cleanPath(QDir::current().absoluteFilePath(ArgFile));
+//		QString filename = QDir::cleanPath("/tmp/1.kdb");
+//		//openDatabase(db, f);
+//		
+//		if (QFile::exists(filename)){
+//			if(db->load(filename, dbReadOnly)){
+//				return 2;
+//			}
+//			else {
+//				return 0;
+//			}
+//
+//		}
+//		else {
+//			return 0;
+//		}
+//		
+//	}
+//	else {
+//		return 0;
+//	}
+	return 2;
+
+
+	
+
+	//db = new Kdb3Database();
+	//Kdb3Database* db = new Kdb3Database();
+	//dbReadOnly = false;
+	
+//	db->setKey(pass, keyfile);
+	
+	
+	
+	
+	//ICustomIcons* CustomIconsDb=dynamic_cast<ICustomIcons*>(db);
+	//IDatabase* db_new=dynamic_cast<IDatabase*>(new Kdb3Database());
+	
+	//return true;
+	return 4;
+}

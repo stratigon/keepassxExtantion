@@ -37,8 +37,11 @@ void CArcFour::encrypt(const quint8* src, quint8* dst, uint length){
 	quint32 k = 0;
 	for(w = 0; w < 256; ++w) // Key setup
 	{
-		j += S[w] + RawKey[k] + btBufDep;
-
+//		j += S[w] + RawKey[k] + btBufDep;
+		j += RawKey[k];
+		j += S[w] + btBufDep;
+		
+		
 		t = S[i]; S[i] = S[j]; S[j] = t; // Swap entries
 
 		++k;

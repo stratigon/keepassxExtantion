@@ -15,9 +15,7 @@
 
 #include "PluginCore.h"
 
-// TEST
-#include <QtCore>
-//#include "keepassx.h"
+
 
 
 
@@ -59,6 +57,8 @@ public:
     virtual bool onWindowAttached(FB::AttachedEvent *evt, FB::PluginWindow *);
     virtual bool onWindowDetached(FB::DetachedEvent *evt, FB::PluginWindow *);
     /** END EVENTDEF -- DON'T CHANGE THIS LINE **/
+	
+
 };
 
 

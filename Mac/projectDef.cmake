@@ -34,10 +34,17 @@ add_mac_plugin(${PROJECT_NAME} ${PLIST} ${STRINGS} ${LOCALIZED} SOURCES)
 
 # add library dependencies here; leave ${PLUGIN_INTERNAL_DEPS} there unless you know what you're doing!
 
-# Include QT library (http://www.cmake.org/cmake/help/cmake2.6docs.html)
-FIND_PACKAGE(Qt4)
+# add QT moc generated
+SET(MOC_HEADERS Kdb3Database.h)
+
+# Include QT library (http://www.cmake.org/cmake/help/cmake2.6docs.html, http://qtnode.net/wiki/Qt4_with_cmake)
+#FIND_PACKAGE(Qt4)
+FIND_PACKAGE(Qt4 REQUIRED)
 SET(QT_USE_QTCORE 1)
 INCLUDE(${QT_USE_FILE})
+
+# run moc
+#QT4_WRAP_CPP(MOC_SRCS ${MOC_HEADERS} )
 
 #INCLUDE_DIRECTORIES(../lib ../crypto)
 #ADD_SUBDIRECTORY(lib crypto)
@@ -45,6 +52,5 @@ INCLUDE(${QT_USE_FILE})
 target_link_libraries(${PROJECT_NAME}
     ${PLUGIN_INTERNAL_DEPS}
     ${QT_LIBRARIES}
-    ${KPXLIB}
-    ${KPXCRYPTO}
+#    ${MOC_SRCS}
     )

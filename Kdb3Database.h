@@ -55,7 +55,7 @@ void memcpyToLEnd16(char* src,const quint16* dst);
  This class provides an interface for the management of custom icons. The implementation is optional and not necessarily needed.
  */
 class ICustomIcons:public QObject{
-//	Q_OBJECT
+	Q_OBJECT
 public:
 	/*! Adds a new custom icon to the database.
 	 \param icon The pixmap which contains the new icon. This function makes a copy of the given pixmap.
@@ -72,11 +72,11 @@ public:
 	 \param icon The pixmap which contains the new icon.
 	 */
 	virtual void replaceIcon(int index,const QPixmap& icon)=0;
-//signals:
-//	/*! This signal is emitted when an icon was modified.
-//	 That means it is emitted after every call off addIcon(), removeIcon() and replaceIcon().
-//	 */
-//	void iconsModified();
+signals:
+	/*! This signal is emitted when an icon was modified.
+	 That means it is emitted after every call off addIcon(), removeIcon() and replaceIcon().
+	 */
+	void iconsModified();
 	
 };
 
@@ -84,9 +84,9 @@ public:
 
 
 //! Implementation of the standard KeePassX database.
-//class Kdb3Database:public ICustomIcons,public IDatabase, public IKdbSettings{
-class Kdb3Database:public IDatabase, public IKdbSettings{
-//	Q_OBJECT
+class Kdb3Database:public ICustomIcons,public IDatabase, public IKdbSettings{
+//class Kdb3Database:public IDatabase, public IKdbSettings{
+	Q_OBJECT
 public:
 	class StdGroup;
 	class StdEntry;
@@ -304,7 +304,6 @@ private:
 };
 
 class KeyTransform : public QThread{
-//class KeyTransform {
 	Q_OBJECT
 	
 	public:
@@ -322,7 +321,6 @@ class KeyTransform : public QThread{
 };
 
 class KeyTransformBenchmark : public QThread{
-//class KeyTransformBenchmark {
 	Q_OBJECT
 	
 	public:
@@ -336,5 +334,7 @@ class KeyTransformBenchmark : public QThread{
 	protected:
 		void run();
 };
+
+
 
 #endif
