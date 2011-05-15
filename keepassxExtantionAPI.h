@@ -28,7 +28,9 @@ public:
     virtual ~keepassxExtantionAPI();
 
     keepassxExtantionPtr getPlugin();
-
+	
+	void init();
+	
     // Read/Write property ${PROPERTY.ident}
     std::string get_testString();
     void set_testString(const std::string& val);
@@ -47,9 +49,12 @@ public:
 	
 	//FB::variant get_param();
 	
-	// Method openDatabase
-//	bool openDatabase(IDatabase* db, QString filename);
-	int openDatabase();
+	// Method getUrls
+	std::string getUrls(std::string filename, std::string openPass);
+	
+	// Method getAccount
+	std::string getAccount(std::string filename, std::string openPass, std::string url);
+	
 	
 public:
 	IDatabase* db;
@@ -59,7 +64,12 @@ private:
     FB::BrowserHostPtr m_host;
 
     std::string m_testString;
-
+	
+	int openDatabase(std::string filename, SecString* secPass);
+	int closeDatabase(std::string filename);
+	
+	std::string kpxErrorMsg;
+	
 	bool dbReadOnly;
 };
 

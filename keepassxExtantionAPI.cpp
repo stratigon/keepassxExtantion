@@ -22,11 +22,12 @@
 ///////////////////////////////////////////////////////////////////////////////
 keepassxExtantionAPI::keepassxExtantionAPI(const keepassxExtantionPtr& plugin, const FB::BrowserHostPtr& host) : m_plugin(plugin), m_host(host)
 {
-    registerMethod("echo",      make_method(this, &keepassxExtantionAPI::echo));
-    registerMethod("testEvent", make_method(this, &keepassxExtantionAPI::testEvent));
-    registerMethod("add",		make_method(this, &keepassxExtantionAPI::add));
-	registerMethod("openDatabase",		make_method(this, &keepassxExtantionAPI::openDatabase));
-
+    registerMethod("echo",			make_method(this, &keepassxExtantionAPI::echo));
+    registerMethod("testEvent",		make_method(this, &keepassxExtantionAPI::testEvent));
+    registerMethod("add",			make_method(this, &keepassxExtantionAPI::add));
+	registerMethod("getUrls",		make_method(this, &keepassxExtantionAPI::getUrls));
+	registerMethod("getAccount",	make_method(this, &keepassxExtantionAPI::getAccount));
+	
 	
     // Read-write property
     registerProperty("testString",
@@ -42,7 +43,8 @@ keepassxExtantionAPI::keepassxExtantionAPI(const keepassxExtantionPtr& plugin, c
                      make_property(this,
 								   &keepassxExtantionAPI::get_version));
     
-    
+	keepassxExtantionAPI::init();
+	
     registerEvent("onfired");    
 }
 
@@ -75,6 +77,20 @@ keepassxExtantionPtr keepassxExtantionAPI::getPlugin()
     return plugin;
 }
 
+
+
+void keepassxExtantionAPI::init(){
+	
+	// Initialize the locale environment.
+	db = new Kdb3Database();
+	dbReadOnly = false;
+
+	
+	initYarrow(); //init random number generator
+	SecString::generateSessionKey();
+	
+	
+}
 
 
 // Read/Write property testString
@@ -118,72 +134,194 @@ long keepassxExtantionAPI::add(long a, long b, long c)
 //}
 
 //! Connector to kdb database
-//bool keepassxExtantionAPI::openDatabase(IDatabase* db, QString filename)
-int keepassxExtantionAPI::openDatabase()
-{
-	//return 1;
-	
-	//db=NULL;
-	db = new Kdb3Database();
-	dbReadOnly = false;
-	const QString ArgFile="1.kdb";
-	
-	initYarrow(); //init random number generator
-	SecString::generateSessionKey();
-	
-	
-	
-	QString pass = "1";
+int keepassxExtantionAPI::openDatabase(std::string filename, SecString* secPass)
+{	
+
+	// This implementation don't provide key file
 	QString keyfile = "";
-	db->setKey(pass, keyfile);
-
-	db->load("/tmp/1.kdb", dbReadOnly);
-	
-	int t = db->numEntries();
-	
-	
-	return t;
-	
-	
-//	if(!ArgFile.isEmpty()){
-//		//QString filename = QDir::cleanPath(QDir::current().absoluteFilePath(ArgFile));
-//		QString filename = QDir::cleanPath("/tmp/1.kdb");
-//		//openDatabase(db, f);
-//		
-//		if (QFile::exists(filename)){
-//			if(db->load(filename, dbReadOnly)){
-//				return 2;
-//			}
-//			else {
-//				return 0;
-//			}
-//
-//		}
-//		else {
-//			return 0;
-//		}
-//		
-//	}
-//	else {
-//		return 0;
-//	}
-	return 2;
-
+	secPass->unlock();
+	db->setKey(secPass->string(), keyfile);
+	secPass->lock();
 
 	
+	if(!filename.empty()){
+		QString qFilename = QDir::cleanPath( QString::fromStdString(filename) );
+		
+		if (QFile::exists(qFilename)){
+			if (!QFile::exists(qFilename+".lock")){
+				
+				if (!dbReadOnly && !QFile::exists(qFilename+".lock")){
+					QFile lock(qFilename+".lock");
+					if (!lock.open(QIODevice::WriteOnly)){
+						dbReadOnly = true;
+					}
+				}
+				
+				
+				if(db->load(qFilename, dbReadOnly)){
+					return 0;
+				}
+				else {
+					keepassxExtantionAPI::kpxErrorMsg = "kpx_error: Can't load database file (error on device or in DB structure)";
+					return 5;
+				}
 
-	//db = new Kdb3Database();
-	//Kdb3Database* db = new Kdb3Database();
-	//dbReadOnly = false;
+			}
+			else {
+				keepassxExtantionAPI::kpxErrorMsg = "kpx_error: Database file is locked";
+				return 4;
+			}
+
+		}
+		else {
+			keepassxExtantionAPI::kpxErrorMsg = "kpx_error: File doesn't exist";
+			return 3;
+		}
+		
+	}
+	else {
+		keepassxExtantionAPI::kpxErrorMsg = "kpx_error: File name is empty";
+		return 2;
+	}
 	
-//	db->setKey(pass, keyfile);
-	
-	
-	
-	
-	//ICustomIcons* CustomIconsDb=dynamic_cast<ICustomIcons*>(db);
-	//IDatabase* db_new=dynamic_cast<IDatabase*>(new Kdb3Database());
-	
-	//return true;
-	return 4;
+	keepassxExtantionAPI::kpxErrorMsg = "kpx_error: Unexpected error";
+	return 1;
 }
+
+int keepassxExtantionAPI::closeDatabase(std::string filename){
+	
+	db->close();
+	
+	
+	delete db;
+	db=NULL;
+	
+	
+	QString qFilename = QDir::cleanPath( QString::fromStdString(filename));
+	
+	if (!dbReadOnly && QFile::exists(qFilename+".lock")){
+		if (!QFile::remove(qFilename+".lock"))
+			keepassxExtantionAPI::kpxErrorMsg = "kpx_error: Couldn't remove database lock file.";
+			return 1;
+	}
+	
+	return 0;
+}
+
+
+
+// Return a UTF8  string with JSON array
+std::string keepassxExtantionAPI::getUrls(std::string filename, std::string openPass){
+	
+	keepassxExtantionAPI::init();
+	
+	SecString secPass;
+	QString tmpPass = QString::fromStdString(openPass);
+	// owerwrite openPass
+	if( openPass.size() )
+		for(int i=0; i<openPass.size(); i++)
+			openPass[i]=0;
+	// set secPass and owerwrite tmpPass
+	secPass.setString(tmpPass, true);
+	
+	
+	// Try open database
+	dbReadOnly = true;
+	if(keepassxExtantionAPI::openDatabase(filename, &secPass))
+		return keepassxExtantionAPI::kpxErrorMsg;
+
+	
+	QString currentUrl;
+	std::string UrlsJSONUtf8 ("[ "); //buffer for JSON array
+	
+	QList<IEntryHandle*> entriesList = db->entries();
+	for(int i=0; i<entriesList.size(); i++){
+		if( entriesList[i]->isValid()) {
+			currentUrl = entriesList[i]->url();
+			UrlsJSONUtf8 += "\"";
+			UrlsJSONUtf8 += currentUrl.toUtf8().constData();
+			UrlsJSONUtf8 += "\", ";
+		}
+	}
+	UrlsJSONUtf8 += "]";
+	
+	if(keepassxExtantionAPI::closeDatabase(filename))
+		return kpxErrorMsg;
+	
+	return UrlsJSONUtf8;
+}
+
+
+std::string  keepassxExtantionAPI::getAccount(std::string filename, std::string openPass, std::string url){
+	
+	keepassxExtantionAPI::init();
+	
+	SecString secPass;
+	QString tmpPass = QString::fromStdString(openPass);
+	// owerwrite openPass
+	if( openPass.size() )
+		for(int i=0; i<openPass.size(); i++)
+			openPass[i]=0;
+	// set secPass and owerwrite tmpPass
+	secPass.setString(tmpPass, true);
+	
+	
+	// Try open database
+	dbReadOnly = true;
+	if(keepassxExtantionAPI::openDatabase(filename, &secPass))
+		return keepassxExtantionAPI::kpxErrorMsg;
+	
+	
+	QString searchURL = QString::fromStdString(url);
+	
+	QString currentStr;
+	SecString currentPass;
+	std::string JSONUtf8 ("[ "); //buffer for JSON array of objects
+	
+	bool Fields[6];
+	Fields[0]=false; //Title
+	Fields[1]=false; //Username
+	Fields[2]=true;  //URL
+	Fields[3]=false; //Password
+	Fields[4]=false; //Comment
+	Fields[5]=false; //Attachment
+
+	//QList<IEntryHandle*> search(IGroupHandle* Group,const QString& SearchString, bool CaseSensitve, bool RegExp,bool Recursive,bool* Fields);
+	QList<IEntryHandle*> searchResults = db->search(NULL,searchURL,false,false,true,Fields);
+
+	for(int i=0; i<searchResults.size(); i++){
+		if( searchResults[i]->isValid()) {
+			JSONUtf8 += "{ \"title\" : \"";
+			currentStr = searchResults[i]->title();
+			JSONUtf8 += currentStr.toUtf8().constData();
+			
+			JSONUtf8 += "\", \"username\" : \"";
+			currentStr = searchResults[i]->username();
+			JSONUtf8 += currentStr.toUtf8().constData();
+			
+			JSONUtf8 += "\", \"url\" : \"";
+			currentStr = searchResults[i]->url();
+			JSONUtf8 += currentStr.toUtf8().constData();
+			
+			JSONUtf8 += "\", \"password\" : \"";
+			currentPass = searchResults[i]->password();
+			currentPass.unlock();
+			currentStr = currentPass.string();
+			currentPass.lock();
+			JSONUtf8 += currentStr.toUtf8().constData();
+			
+			JSONUtf8 += "\" }, ";
+
+		}
+	}
+	
+	JSONUtf8 += " ]";
+	
+	
+	if(keepassxExtantionAPI::closeDatabase(filename))
+		return kpxErrorMsg;
+
+	return JSONUtf8;
+}
+
+
