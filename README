@@ -1,0 +1,8 @@
+Description
+-------
+KeepassxExtantion provide API for access to KeePassX or Keepass kdb files from browser. It is use NPAPI interface to work with browser.
+
+
+License
+-------
+  This plugin is licensed under the Lesser GNU General Public License version 2.1.

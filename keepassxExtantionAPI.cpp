@@ -42,8 +42,7 @@ keepassxExtantionAPI::keepassxExtantionAPI(const keepassxExtantionPtr& plugin, c
 	registerProperty("version",
                      make_property(this,
 								   &keepassxExtantionAPI::get_version));
-    
-	keepassxExtantionAPI::init();
+
 	
     registerEvent("onfired");    
 }
@@ -191,14 +190,10 @@ int keepassxExtantionAPI::openDatabase(std::string filename, SecString* secPass)
 int keepassxExtantionAPI::closeDatabase(std::string filename){
 	
 	db->close();
-	
-	
 	delete db;
 	db=NULL;
 	
-	
 	QString qFilename = QDir::cleanPath( QString::fromStdString(filename));
-	
 	if (!dbReadOnly && QFile::exists(qFilename+".lock")){
 		if (!QFile::remove(qFilename+".lock"))
 			keepassxExtantionAPI::kpxErrorMsg = "kpx_error: Couldn't remove database lock file.";
